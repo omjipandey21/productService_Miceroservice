@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -20,8 +22,8 @@ public class ProductDto {
     private String description;
     private String sku;
     private String brand;
-    private Double price;
-    private Double salePrice;
+    private BigDecimal price;
+    private BigDecimal salePrice;
     private String currency;
     private Boolean isOnSale;
     private Integer stockQuantity;

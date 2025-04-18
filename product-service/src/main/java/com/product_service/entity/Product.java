@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -45,10 +46,10 @@ public class Product {
     private String brand;
 
     @Column(name = "price", nullable = false)
-    private Double price;
+    private BigDecimal price;
 
     @Column(name = "sale_price")
-    private Double salePrice;
+    private BigDecimal salePrice;
 
     @Column(name = "currency", length = 3)
     private String currency;

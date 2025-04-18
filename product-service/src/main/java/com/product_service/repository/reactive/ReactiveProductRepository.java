@@ -10,7 +10,7 @@ import java.awt.print.Pageable;
 
 public interface ReactiveProductRepository extends ReactiveCrudRepository<Product, Long> {
 
-    Flux<Product> findByCategroyId(Long categoryId);
+    Flux<Product> findByProductId(Long categoryId);
     Flux<Product> findByProductName(String productName);
     Flux<Product> findByIsOnSale(Boolean result);
     Flux<Product> findByIsAvailable(Boolean result);
