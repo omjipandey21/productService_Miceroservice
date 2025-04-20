@@ -1,4 +1,4 @@
-package com.product_service.repository.nonReatcive.product;
+package com.product_service.repository.non_reactive.product;
 
 import com.product_service.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;

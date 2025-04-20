@@ -1,13 +1,15 @@
 package com.product_service.entity;
 
+import com.product_service.entity.enumm.Status;
+import com.product_service.entity.mappedEntity.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
 @Data
@@ -18,7 +20,10 @@ import java.util.List;
 @Table(name = "category", uniqueConstraints = {
         @UniqueConstraint(name = "uc_category_slug", columnNames = "slug")
 })
-public class Category {
+public class Category extends AuditableEntity implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,9 +38,17 @@ public class Category {
     @Column(name = "description")
     private String description;
 
-    /**
-     * Self-referencing parent category (for hierarchical categories).
-     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "isActive")
+    private Status status;
+
+    @Lob
+    @Column(name = "imageUrl")
+    private String imageUrl;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
@@ -43,11 +56,7 @@ public class Category {
     @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL)
     private List<Category> subCategories;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = false)
+    private List<Product> products;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

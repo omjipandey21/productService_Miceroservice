@@ -1,14 +1,17 @@
 package com.product_service.entity;
 
 import com.product_service.entity.enumm.Status;
+import com.product_service.entity.mappedEntity.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -20,7 +23,10 @@ import java.util.Map;
         @UniqueConstraint(name = "uc_product_slug", columnNames = "slug"),
         @UniqueConstraint(name = "uc_product_sku", columnNames = "sku")
 })
-public class Product {
+public class Product extends AuditableEntity implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +36,6 @@ public class Product {
     @Column(name = "product_name", nullable = false)
     private String productName;
 
-    /**
-     * URL-friendly version of the product name.
-     */
     @Column(name = "slug", nullable = false, unique = true)
     private String slug;
 
@@ -63,9 +66,6 @@ public class Product {
     @Column(name = "low_stock_threshold")
     private Integer lowStockThreshold;
 
-    @Column(name = "is_available")
-    private Boolean isAvailable;
-
     // Many products belong to one category
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -95,14 +95,6 @@ public class Product {
     @MapKeyColumn(name = "dimension_type") // e.g., height, width, depth
     @Column(name = "dimension_value")
     private Map<String, String> dimension;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
