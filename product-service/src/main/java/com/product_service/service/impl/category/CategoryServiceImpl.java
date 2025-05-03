@@ -44,6 +44,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
 
     private final EntityManager entityManager;
     private final NonReactiveCategoryRepository nonReactiveCategoryRepository;
+    private final CategoryMapper categoryMapper;
 
     private Status parseStatus(String statusStr) {
         try {
@@ -61,8 +62,8 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
     @Override
     public CategoryDto createCategory(@NonNull CategoryDto categoryDto) {
         log.info("Creating category: {}", categoryDto.getCategoryName());
-        Category savedCategory = nonReactiveCategoryRepository.save(CategoryMapper.INSTANCE.toEntity(categoryDto));
-        return CategoryMapper.INSTANCE.toDto(savedCategory);
+        Category savedCategory = nonReactiveCategoryRepository.save(categoryMapper.toEntity(categoryDto));
+        return categoryMapper.toDto(savedCategory);
     }
 
     @Transactional
@@ -74,11 +75,11 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
         log.info("Creating {} categories", categoryDto.size());
         return nonReactiveCategoryRepository.saveAll(
                 categoryDto.stream()
-                        .map(CategoryMapper.INSTANCE::toEntity)
+                        .map(categoryMapper::toEntity)
                         .toList()
                 )
                 .stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -86,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
     @Override
     public CategoryDto getCategoryById(Long categoryId) {
         return nonReactiveCategoryRepository.findById(categoryId)
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .orElseThrow(() -> new CategoryNotFoundException(categoryId));
     }
 
@@ -97,7 +98,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
         nonReactiveCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException(categoryId));
         categoryDto.setId(categoryId);
-        return CategoryMapper.INSTANCE.toDto(nonReactiveCategoryRepository.save(CategoryMapper.INSTANCE.toEntity(categoryDto)));
+        return categoryMapper.toDto(nonReactiveCategoryRepository.save(categoryMapper.toEntity(categoryDto)));
     }
 
     // ==================== Status Management ====================
@@ -109,7 +110,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
                 .orElseThrow(() -> new CategoryNotFoundException(categoryId));
 
         category.setStatus(parsedStatus);
-        return CategoryMapper.INSTANCE.toDto(nonReactiveCategoryRepository.save(category));
+        return categoryMapper.toDto(nonReactiveCategoryRepository.save(category));
     }
 
     @Transactional
@@ -160,7 +161,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
     public List<CategoryDto> getAllCategories() {
         return nonReactiveCategoryRepository.findAll()
                 .stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -170,7 +171,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
         return nonReactiveCategoryRepository.findAll(pageable)
-                .map(CategoryMapper.INSTANCE::toDto);
+                .map(categoryMapper::toDto);
     }
 
 
@@ -181,7 +182,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
         Status parsedStatus = parseStatus(status);
         return nonReactiveCategoryRepository.findByCategoryStatus(parsedStatus)
                 .stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -191,7 +192,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
     public List<CategoryDto> searchCategoriesByName(String name) {
         return nonReactiveCategoryRepository.findByCategoryName(name)
                 .stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -227,7 +228,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
 
         List<Category> result = entityManager.createQuery(query).getResultList();
         return result.stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -251,7 +252,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
         }
         return nonReactiveCategoryRepository.findAll(categorySpecification)
                 .stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -260,7 +261,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
     @Override
     public List<CategoryDto> getCategoriesWithProducts(Long categoryId) {
         return nonReactiveCategoryRepository.findAllProductByCategoryId(categoryId)
-                .stream().map(CategoryMapper.INSTANCE::toDto).toList();
+                .stream().map(categoryMapper::toDto).toList();
     }
 
     @Override
@@ -268,7 +269,7 @@ public class CategoryServiceImpl implements CategoryService, Serializable {
         Status parsedStatus = parseStatus(status);
         return nonReactiveCategoryRepository.findCategoryWithProductStatus(parsedStatus)
                 .stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 

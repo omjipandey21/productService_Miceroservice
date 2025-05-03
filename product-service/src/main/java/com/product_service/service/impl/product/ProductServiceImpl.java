@@ -36,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final ReactiveProductRepository reactiveProductRepository;
     private final NonReactiveProductRepository nonReactiveProductRepository;
     private final CacheManager cacheManager;
+    private final ProductMapper productMapper;
 
     // =============================================
     // BASIC CRUD OPERATIONS
@@ -44,16 +45,16 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public ProductDto createProduct(ProductDto productDto) {
-        Product product = ProductMapper.INSTANCE.toEntity(productDto);
+        Product product = productMapper.toEntity(productDto);
         Product createdProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(createdProduct);
+        return productMapper.toDto(createdProduct);
     }
 
     @Override
     @Cacheable(value = "product", key = "#productId")
     public ProductDto getProductById(Long productId){
         return nonReactiveProductRepository.findById(productId)
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
@@ -61,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> findAllProducts(){
         return nonReactiveProductRepository.findAll()
                 .stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .toList();
     }
 
@@ -71,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
         productIds.forEach(productId -> {
             Product productFound = nonReactiveProductRepository.findById(productId)
                     .orElseThrow(() -> new ProductNotFoundException(productId));
-            foundProductList.add(ProductMapper.INSTANCE.toDto(productFound));
+            foundProductList.add(productMapper.toDto(productFound));
         });
         if (foundProductList.isEmpty()){
             log.warn("Unknown exception occurred while fetching the product list");
@@ -90,7 +91,7 @@ public class ProductServiceImpl implements ProductService {
 
         log.info(cachedProduct != null ? "Product found in cache" : "Product not found in cache");
 
-        Product updatingProduct = ProductMapper.INSTANCE.toEntity(productDto);
+        Product updatingProduct = productMapper.toEntity(productDto);
         updatingProduct.setProductId(productId);
 
         if(cachedProduct == null){
@@ -99,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Product updatedProduct = nonReactiveProductRepository.save(updatingProduct);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     @Transactional
@@ -138,7 +139,7 @@ public class ProductServiceImpl implements ProductService {
             throw new ProductNotFoundException("Products not found with name: "+ productName);
         }
         return matchingProduct.stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .toList();
     }
 
@@ -146,7 +147,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductsByAttributeName(String attributeName){
         return nonReactiveProductRepository.findByPartialAttributeValue(attributeName)
                 .stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .toList();
     }
 
@@ -154,7 +155,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductsByAttributeNameContaining(String searchValue){
         return nonReactiveProductRepository.findByPartialAttributeValue(searchValue)
                 .stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -162,7 +163,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductsBySaleStatus(boolean productOnSale){
         return nonReactiveProductRepository.findByIsOnSale(productOnSale)
                 .stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -170,7 +171,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> getProductsByLowStockThreshold(Integer threshold){
         return nonReactiveProductRepository.findByLowStockThreshold(threshold)
                 .stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -186,7 +187,7 @@ public class ProductServiceImpl implements ProductService {
                 new ProductNotFoundException(productId));
         product.setStatus(status);
         Product updatedProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     @Transactional
@@ -198,7 +199,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         product.setPrice(updatedPrice);
         Product updatedProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     @Transactional
@@ -209,7 +210,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         product.setSalePrice(updateSalePrice);
         Product updatedProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     @Transactional
@@ -220,7 +221,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         product.setStockQuantity(stockQty);
         Product updatedProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     @Transactional
@@ -231,7 +232,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         product.setAttributes(newAttributes);
         Product updatedProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     @CachePut(value = "product", key = "#productId")
@@ -242,7 +243,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         product.setDimension(newDimensions);
         Product updatedProduct = nonReactiveProductRepository.save(product);
-        return ProductMapper.INSTANCE.toDto(updatedProduct);
+        return productMapper.toDto(updatedProduct);
     }
 
     // =============================================
@@ -253,7 +254,7 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductDto> getAllProductsPaginated(int pageNo, int pageSize, String sortByPropertyName) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Order.asc(sortByPropertyName)));
         return nonReactiveProductRepository.findAll(pageable)
-                .map(ProductMapper.INSTANCE::toDto);
+                .map(productMapper::toDto);
     }
 
     // =============================================
@@ -265,7 +266,7 @@ public class ProductServiceImpl implements ProductService {
         return nonReactiveProductRepository.findAll()
                 .stream()
                 .collect(Collectors.groupingBy(Product::getStatus,
-                        Collectors.mapping(ProductMapper.INSTANCE::toDto, Collectors.toList())));
+                        Collectors.mapping(productMapper::toDto, Collectors.toList())));
     }
 
     @Override
@@ -288,7 +289,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Optional<ProductDto> findMostExpensiveProduct() {
         return Optional.of(nonReactiveProductRepository.findByMostExpensiveProduct()
-                        .map(ProductMapper.INSTANCE::toDto))
+                        .map(productMapper::toDto))
                 .orElseThrow(() -> new ProductNotFoundException("No product could be found"));
     }
 
@@ -301,7 +302,7 @@ public class ProductServiceImpl implements ProductService {
         return nonReactiveProductRepository.findAll()
                 .stream()
                 .filter(product -> product.getStatus().equals(status))
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .toList();
     }
 
@@ -309,7 +310,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDto> filterProductsByPriceRange(double minPrice, double maxPrice){
         return nonReactiveProductRepository.findByProductsRange(minPrice, maxPrice)
                 .stream()
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -321,7 +322,7 @@ public class ProductServiceImpl implements ProductService {
     public Flux<ProductDto> getAllProductsReactive() {
         return reactiveProductRepository.findAll()
                 .switchIfEmpty(Flux.error(() -> new ProductNotFoundException("Products could not be found")))
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .doOnComplete(() -> log.info("All products are fetched"))
                 .doOnError(error -> log.warn("Error fetching the list of product: {}", error.getMessage()));
     }
@@ -330,7 +331,7 @@ public class ProductServiceImpl implements ProductService {
     public Mono<ProductDto> getProductByIdReactive(Long productId) {
         return reactiveProductRepository.findById(productId)
                 .switchIfEmpty(Mono.error(() -> new ProductNotFoundException(productId)))
-                .map(ProductMapper.INSTANCE::toDto)
+                .map(productMapper::toDto)
                 .doOnSuccess(success -> log.info("Product found"))
                 .doOnError(error -> log.warn("Error occurred while fetching product with id: {}", error.getMessage()));
     }

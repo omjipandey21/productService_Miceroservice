@@ -15,7 +15,6 @@ import java.time.ZonedDateTime;
 @Builder
 @Data
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class ExceptionMessage implements Serializable {
 
     @Serial

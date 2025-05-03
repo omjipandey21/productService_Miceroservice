@@ -10,7 +10,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring", uses = {ProductMapper.class})
 public interface CategoryMapper {
 
-    CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
     @Mapping(target = "products", source = "products")
     @Mapping(target = "parentCategory", ignore = true) // Handle separately
